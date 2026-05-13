@@ -1,11 +1,41 @@
+import { useState } from "react"
+import { Pencil, Trash2 } from "lucide-react"
+
 function Sidebar({
 
   chats,
   activeChatId,
   setActiveChatId,
-  createNewChat
+  createNewChat,
+  deleteChat,
+  renameChat,
+  searchTerm,
+  setSearchTerm
 
 }) {
+
+  const [editingChatId, setEditingChatId] =
+    useState(null)
+
+  const [editText, setEditText] =
+    useState("")
+
+  const startEditing = (chat) => {
+    setEditingChatId(chat.id)
+    setEditText(chat.title)
+  }
+
+  const saveEdit = () => {
+
+    if (editText.trim() !== "") {
+      renameChat(
+        editingChatId,
+        editText
+      )
+    }
+
+    setEditingChatId(null)
+  }
 
   return (
 
@@ -23,22 +53,106 @@ function Sidebar({
         + New Chat
       </button>
 
+       {/* Search */}
+      <input
+
+        type="text"
+
+        placeholder="Search chats..."
+
+        value={searchTerm}
+
+        onChange={(e) =>
+            setSearchTerm(e.target.value)
+        }
+
+        className="bg-gray-900 p-3 rounded-lg mb-4 outline-none text-white"
+
+        />
+
       {/* Chat History */}
       <div className="flex flex-col gap-2 overflow-y-auto">
 
         {chats.map((chat) => (
 
-          <button
+          <div
             key={chat.id}
-            onClick={() => setActiveChatId(chat.id)}
-            className={
+            className={`group flex items-center justify-between p-3 rounded-lg ${
               activeChatId === chat.id
-                ? "bg-gray-700 p-3 rounded-lg text-left"
-                : "bg-gray-900 p-3 rounded-lg text-left hover:bg-gray-700"
-            }
+                ? "bg-gray-700"
+                : "bg-gray-900 hover:bg-gray-700"
+            }`}
           >
-            {chat.title}
-          </button>
+
+            {/* Edit Mode */}
+            {editingChatId === chat.id ? (
+
+              <input
+                value={editText}
+                autoFocus
+                onChange={(e) =>
+                  setEditText(e.target.value)
+                }
+
+                onBlur={saveEdit}
+
+                onKeyDown={(e) => {
+
+                  if (e.key === "Enter") {
+                    saveEdit()
+                  }
+
+                  if (e.key === "Escape") {
+                    setEditingChatId(null)
+                  }
+
+                }}
+
+                className="flex-1 bg-gray-600 text-white px-2 py-1 rounded outline-none"
+              />
+
+            ) : (
+
+              <>
+                {/* Chat Title */}
+                <div
+                  onClick={() =>
+                    setActiveChatId(chat.id)
+                  }
+                  className="flex-1 truncate cursor-pointer"
+                >
+                  {chat.title}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 ml-2 opacity-0 group-hover:opacity-100 transition">
+
+                    {/* Rename */}
+                    <button
+                        onClick={() =>
+                            startEditing(chat)
+                        }
+                        className="text-gray-300 hover:text-white"
+                        >
+                        <Pencil size={16} />
+                    </button>
+
+                    {/* Delete */}
+                    <button
+                        onClick={() =>
+                            deleteChat(chat.id)
+                        }
+                        className="text-red-400 hover:text-red-500"
+                        >
+                        <Trash2 size={16} />
+                    </button>
+
+                </div>
+              </>
+
+            )}
+
+          </div>
 
         ))}
 

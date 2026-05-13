@@ -17,7 +17,8 @@ function ChatWindow({
 
         <MessageBubble
           key={index}
-          message={msg}
+          text={msg.text}
+          sender={msg.sender}
         />
 
       ))}

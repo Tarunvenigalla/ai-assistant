@@ -3,7 +3,9 @@ function InputBar({
   input,
   setInput,
   sendMessage,
-  handleKeyDown
+  handleKeyDown,
+  isTyping,
+  stopGenerating
 
 }) {
 
@@ -21,10 +23,22 @@ function InputBar({
       />
 
       <button
-        onClick={sendMessage}
-        className="bg-blue-600 px-8 rounded-xl hover:bg-blue-700 transition"
+
+        onClick={
+          isTyping
+            ? stopGenerating
+            : sendMessage
+        }
+
+        className={`px-8 rounded-xl text-white transition ${
+          isTyping
+            ? "bg-red-600 hover:bg-red-700"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
       >
-        Send
+
+        {isTyping ? "Stop" : "Send"}
+
       </button>
 
     </div>
