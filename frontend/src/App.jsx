@@ -53,6 +53,9 @@ function App() {
   const messagesEndRef = useRef(null)
   const controllerRef = useRef(null)
 
+  const [lastPrompt, setLastPrompt] = useState("")
+  const [editingIndex, setEditingIndex] = useState(null)
+
   // Auto scroll
   useEffect(() => {
 
@@ -77,28 +80,71 @@ function App() {
 
     const userInput = input
 
+    let aiResponseIndex = null
+
+    setLastPrompt(userInput)
+
     setIsTyping(true)
 
     setInput("")
 
     // Add user message instantly
     setChats((prevChats) =>
-      prevChats.map((chat) =>
-        chat.id === activeChatId
-          ? {
-              ...chat,
+      prevChats.map((chat) => {
 
-              messages: [
-                ...chat.messages,
-                userMessage,
-                {
-                  text: "",
-                  sender: "ai"
-                }
-              ]
+        if (chat.id !== activeChatId)
+          return chat
+
+        let updatedMessages = [...chat.messages]
+
+        // EDIT EXISTING MESSAGE
+        if (editingIndex !== null) {
+
+          aiResponseIndex = editingIndex + 1
+
+          // update old user message
+          updatedMessages[editingIndex] = {
+            text: userInput,
+            sender: "user"
+          }
+
+          // remove old AI response
+          updatedMessages.splice(
+            editingIndex + 1,
+            1
+          )
+
+          // add fresh AI placeholder
+          updatedMessages.splice(
+            editingIndex + 1,
+            0,
+            {
+              text: "",
+              sender: "ai"
             }
-          : chat
-      )
+          )
+
+        } else {
+
+          aiResponseIndex = updatedMessages.length + 1
+
+          // Normal new message
+          updatedMessages.push(
+            userMessage,
+            {
+              text: "",
+              sender: "ai"
+            }
+          )
+
+        }
+
+        return {
+          ...chat,
+          messages: updatedMessages
+        }
+
+      })
     )
 
     // Generate title in background
@@ -146,7 +192,7 @@ function App() {
 
               // Update last AI message live
               updatedMessages[
-                updatedMessages.length - 1
+                aiResponseIndex
               ] = {
                 text: streamText,
                 sender: "ai"
@@ -196,6 +242,96 @@ function App() {
         )
 
       }
+
+    }
+
+    setIsTyping(false)
+    setEditingIndex(null)
+    setInput("")
+  }
+
+  const regenerateResponse = async () => {
+
+    if (!lastPrompt || isTyping) return
+
+    // Remove last AI message
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+
+        if (chat.id !== activeChatId)
+          return chat
+
+        const updatedMessages = [...chat.messages]
+
+        // Remove last AI response
+        if (
+          updatedMessages.length > 0 &&
+          updatedMessages[updatedMessages.length - 1].sender === "ai"
+        ) {
+          updatedMessages.pop()
+        }
+
+        return {
+          ...chat,
+          messages: [
+            ...updatedMessages,
+            {
+              text: "",
+              sender: "ai"
+            }
+          ]
+        }
+      })
+    )
+
+    setIsTyping(true)
+
+    try {
+
+      controllerRef.current =
+        new AbortController()
+
+      await sendChatMessage(
+
+        lastPrompt,
+
+        (streamText) => {
+
+          setChats((prevChats) =>
+            prevChats.map((chat) => {
+
+              if (chat.id !== activeChatId)
+                return chat
+
+              const updatedMessages = [
+                ...chat.messages
+              ]
+
+              updatedMessages[
+                updatedMessages.length - 1
+              ] = {
+                text: streamText,
+                sender: "ai"
+              }
+
+              return {
+                ...chat,
+                messages: updatedMessages
+              }
+
+            })
+          )
+
+        },
+
+        activeChatId.toString(),
+        controllerRef.current
+
+      )
+
+    } catch (error) {
+
+      console.error(error)
 
     }
 
@@ -281,6 +417,14 @@ function App() {
 
   }
 
+  const editMessage = (text, index) => {
+
+    setInput(text)
+
+    setEditingIndex(index)
+
+  }
+
   const stopGenerating = () => {
 
     if (controllerRef.current) {
@@ -318,6 +462,7 @@ function App() {
           messages={activeChat?.messages || []}
           isTyping={isTyping}
           messagesEndRef={messagesEndRef}
+          onEdit={editMessage}
         />
 
         <InputBar
@@ -327,6 +472,8 @@ function App() {
           handleKeyDown={handleKeyDown}
           isTyping={isTyping}
           stopGenerating={stopGenerating}
+          regenerateResponse={regenerateResponse}
+          editingIndex={editingIndex}
         />
 
       </div>

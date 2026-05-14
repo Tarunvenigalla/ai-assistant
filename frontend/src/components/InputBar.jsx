@@ -5,7 +5,9 @@ function InputBar({
   sendMessage,
   handleKeyDown,
   isTyping,
-  stopGenerating
+  stopGenerating,
+  regenerateResponse,
+  editingIndex
 
 }) {
 
@@ -13,6 +15,12 @@ function InputBar({
 
     <div className="p-4 border-t border-gray-700 flex gap-3">
 
+      {editingIndex !== null && (
+        <div className="text-sm text-yellow-400">
+          Editing message...
+        </div>
+      )}
+      
       <input
         type="text"
         placeholder="Type your message..."
@@ -39,6 +47,19 @@ function InputBar({
 
         {isTyping ? "Stop" : "Send"}
 
+      </button>
+
+      <button
+        onClick={regenerateResponse}
+        className="
+          bg-gray-700
+          hover:bg-gray-600
+          px-4
+          py-2
+          rounded-xl
+        "
+      >
+        ↻ Regenerate
       </button>
 
     </div>

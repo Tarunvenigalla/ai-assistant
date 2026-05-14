@@ -1,13 +1,23 @@
 import MessageBubble from "./MessageBubble"
 import TypingIndicator from "./TypingIndicator"
+import { useEffect } from "react"
 
 function ChatWindow({
 
   messages,
   isTyping,
-  messagesEndRef
+  messagesEndRef,
+  onEdit
 
 }) {
+
+  useEffect(() => {
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth"
+    })
+
+  }, [messages, isTyping])
 
   return (
 
@@ -19,6 +29,8 @@ function ChatWindow({
           key={index}
           text={msg.text}
           sender={msg.sender}
+          index={index}
+          onEdit={onEdit}
         />
 
       ))}
