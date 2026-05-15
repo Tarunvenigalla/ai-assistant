@@ -57,7 +57,7 @@ async def chat(request: ChatRequest):
     })
 
     payload = {
-        "model": "llama3.2:3b",
+        "model": "tinyllama",
         "messages": chat_history[request.session_id],
         "stream": True,
         "options": {
