@@ -1,3 +1,5 @@
+import { ArrowUp } from "lucide-react"
+
 function InputBar({
 
   input,
@@ -20,7 +22,7 @@ function InputBar({
           Editing message...
         </div>
       )}
-      
+
       <input
         type="text"
         placeholder="Type your message..."
@@ -38,28 +40,34 @@ function InputBar({
             : sendMessage
         }
 
-        className={`px-8 rounded-xl text-white transition ${
-          isTyping
-            ? "bg-red-600 hover:bg-red-700"
-            : "bg-blue-600 hover:bg-blue-700"
-        }`}
-      >
-
-        {isTyping ? "Stop" : "Send"}
-
-      </button>
-
-      <button
-        onClick={regenerateResponse}
         className="
-          bg-gray-700
-          hover:bg-gray-600
-          px-4
-          py-2
-          rounded-xl
+          w-12
+          h-12
+          rounded-full
+          bg-black
+          flex
+          items-center
+          justify-center
+          hover:scale-105
+          transition
         "
       >
-        ↻ Regenerate
+
+        {isTyping ? (
+
+          <div className="text-white font-bold">
+            ■
+          </div>
+
+        ) : (
+
+          <ArrowUp
+            size={20}
+            color="white"
+          />
+
+        )}
+
       </button>
 
     </div>

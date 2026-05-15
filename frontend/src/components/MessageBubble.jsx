@@ -6,6 +6,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
 
+import { Pencil, Trash2, RotateCcw } from "lucide-react"
+
 function CodeBlock({ language, value }) {
 
   const [copied, setCopied] = useState(false)
@@ -81,10 +83,15 @@ function MessageBubble({
 
   text,
   sender,
+  timestamp,
   onEdit,
+  onDelete,
+  onRegenerate,
   index
 
 }) {
+
+  const [showActions, setShowActions] = useState(false)
 
   return (
 
@@ -98,7 +105,16 @@ function MessageBubble({
     >
 
       <div
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => {
+
+          setTimeout(() => {
+            setShowActions(false)
+          }, 150)
+
+        }}
         className={`
+          relative
           max-w-3xl
           px-4
           py-3
@@ -141,17 +157,72 @@ function MessageBubble({
         </ReactMarkdown>
         
         {sender === "user" && (
-          <button
-            onClick={() => onEdit(text, index)}
-            className="
-              text-gray-300
-              hover:text-white
-              mt-2
-              text-sm
-            "
+
+          <div
+            className={`
+              absolute
+              -bottom-12
+              right-2
+              ${
+                showActions
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
+              }
+              flex
+              items-center
+              gap-3
+              bg-black/70
+              backdrop-blur-sm
+              px-3
+              py-1
+              rounded-lg
+              shadow-lg
+              z-20
+              transition-all
+              duration-200
+            `}
           >
-            🖉
-          </button>
+
+            {/* Timestamp */}
+            <div className="text-xs text-gray-400">
+              {timestamp}
+            </div>
+
+            {/* Edit */}
+            <button
+              onClick={() => onEdit(text, index)}
+              className="
+                text-gray-300
+                hover:text-white
+              "
+            >
+              <Pencil size={14} />
+            </button>
+
+            {/* Delete */}
+            <button
+              onClick={() => onDelete(index)}
+              className="
+                text-red-400
+                hover:text-red-500
+              "
+            >
+              <Trash2 size={14} />
+            </button>
+
+            {/* Regenerate */}
+            <button
+              onClick={() => onRegenerate(text)}
+              className="
+                text-gray-300
+                hover:text-white
+              "
+            >
+              <RotateCcw size={14} />
+            </button>
+
+          </div>
+
         )}
 
       </div>

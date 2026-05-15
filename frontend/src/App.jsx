@@ -73,12 +73,17 @@ function App() {
 
     if (input.trim() === "") return
 
+    const userInput = input
+
     const userMessage = {
-      text: input,
-      sender: "user"
+      text: userInput,
+      sender: "user",
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      })
     }
 
-    const userInput = input
 
     let aiResponseIndex = null
 
@@ -120,7 +125,11 @@ function App() {
             0,
             {
               text: "",
-              sender: "ai"
+              sender: "ai",
+              timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+              })
             }
           )
 
@@ -133,7 +142,11 @@ function App() {
             userMessage,
             {
               text: "",
-              sender: "ai"
+              sender: "ai",
+              timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+              })
             }
           )
 
@@ -195,7 +208,13 @@ function App() {
                 aiResponseIndex
               ] = {
                 text: streamText,
-                sender: "ai"
+                sender: "ai",
+                timestamp: updatedMessages[
+                  aiResponseIndex
+                ]?.timestamp || new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })
               }
 
               return {
@@ -233,7 +252,11 @@ function App() {
                     ...chat.messages,
                     {
                       text: "Error connecting to AI backend ❌",
-                      sender: "ai"
+                      sender: "ai",
+                      timestamp: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })
                     }
                   ]
                 }
@@ -277,7 +300,11 @@ function App() {
             ...updatedMessages,
             {
               text: "",
-              sender: "ai"
+              sender: "ai",
+              timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+              })
             }
           ]
         }
@@ -311,7 +338,13 @@ function App() {
                 updatedMessages.length - 1
               ] = {
                 text: streamText,
-                sender: "ai"
+                sender: "ai",
+                timestamp: updatedMessages[
+                  updatedMessages.length - 1
+                ]?.timestamp || new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })
               }
 
               return {
@@ -353,7 +386,11 @@ function App() {
       messages: [
         {
           text: "Hello 👋 How can I help you today?",
-          sender: "ai"
+          sender: "ai",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+          })
         }
       ]
     }
@@ -436,6 +473,37 @@ function App() {
     setIsTyping(false)
   }
 
+  const deleteMessage = (index) => {
+
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+
+        if (chat.id !== activeChatId)
+          return chat
+
+        const updatedMessages = [...chat.messages]
+
+        // remove user message
+        updatedMessages.splice(index, 1)
+
+        // remove AI response if exists
+        if (
+          updatedMessages[index] &&
+          updatedMessages[index].sender === "ai"
+        ) {
+          updatedMessages.splice(index, 1)
+        }
+
+        return {
+          ...chat,
+          messages: updatedMessages
+        }
+
+      })
+    )
+
+  }
+
   return (
     <div className="h-screen flex bg-gray-900 text-white">
 
@@ -463,6 +531,8 @@ function App() {
           isTyping={isTyping}
           messagesEndRef={messagesEndRef}
           onEdit={editMessage}
+          onDelete={deleteMessage}
+          onRegenerate={regenerateResponse}
         />
 
         <InputBar

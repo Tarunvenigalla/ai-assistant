@@ -7,7 +7,9 @@ function ChatWindow({
   messages,
   isTyping,
   messagesEndRef,
-  onEdit
+  onEdit,
+  onDelete,
+  onRegenerate
 
 }) {
 
@@ -31,12 +33,14 @@ function ChatWindow({
           sender={msg.sender}
           index={index}
           onEdit={onEdit}
+          onDelete={onDelete}
+          timestamp={msg.timestamp}
+          onRegenerate={onRegenerate}
+          
         />
 
       ))}
 
-      {/* Typing Indicator */}
-      {isTyping && <TypingIndicator />}
 
       {/* Auto Scroll */}
       <div ref={messagesEndRef} />
